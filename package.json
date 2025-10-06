@@ -33,7 +33,8 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/SevenApi.credentials.js"
+      "dist/credentials/SevenApi.credentials.js",
+      "dist/credentials/SevenOAuth2Api.credentials.js"
     ],
     "nodes": [
       "dist/nodes/Seven/Seven.node.js"

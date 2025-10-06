@@ -29,7 +29,7 @@ export async function sevenApiRequest(
 		options.form = body;
 	}
 
-	const response = await this.helpers.requestWithAuthentication.call(this, 'sevenApi', options);
+	const response = await this.helpers.requestWithAuthentication.call(this, 'sevenOAuth2Api', options);
 
 	if (response.success !== '100') {
 		throw new NodeApiError(this.getNode(), response as JsonObject, {

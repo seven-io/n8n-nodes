@@ -25,12 +25,43 @@ export class Seven implements INodeType {
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		credentials: [
-			{
+/*			{
 				name: 'sevenApi',
 				required: true,
+				displayOptions: {
+					show: {
+						authentication: ['accessToken'],
+					},
+				},
+			},*/
+			{
+				name: 'sevenOAuth2Api',
+				required: true,
+/*				displayOptions: {
+					show: {
+						authentication: ['oAuth2'],
+					},
+				},*/
 			},
 		],
 		properties: [
+/*			{
+				displayName: 'Authentication',
+				name: 'authentication',
+				type: 'options',
+				options: [
+					{
+						name: 'Access Token',
+						value: 'accessToken',
+					},
+					{
+						name: 'OAuth2',
+						value: 'oAuth2',
+					},
+				],
+				default: 'accessToken',
+				description: 'Means of authenticating with the service',
+			},*/
 			{
 				displayName: 'Resource',
 				name: 'resource',
@@ -267,7 +298,8 @@ export class Seven implements INodeType {
 						type: 'string',
 						default: '',
 						placeholder: 'agent_teqt3qt32j9t',
-						description: 'The unique ID of your agent. You can view this in the Settings of your account. If not specified, the first RCS-capable sender will be used.',
+						description:
+							'The unique ID of your agent. You can view this in the Settings of your account. If not specified, the first RCS-capable sender will be used.',
 					},
 				],
 			},
