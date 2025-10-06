@@ -5,9 +5,37 @@ import {
 	type INodeExecutionData,
 	type INodeType,
 	type INodeTypeDescription,
+	INodeProperties,
 } from 'n8n-workflow';
 
 import { sevenApiRequest } from './GenericFunctions';
+import { smsFields, smsOperations } from './description/SmsDescription';
+import { rcsFields, rcsOperations } from './description/RcsDescription';
+import { voiceFields, voiceOperations } from './description/VoiceDescription';
+
+const resources: INodeProperties[] = [
+	{
+		displayName: 'Resource',
+		name: 'resource',
+		type: 'options',
+		noDataExpression: true,
+		options: [
+			{
+				name: 'SMS',
+				value: 'sms',
+			},
+			{
+				name: 'Voice Call',
+				value: 'voice',
+			},
+			{
+				name: 'RCS Message',
+				value: 'rcs',
+			},
+		],
+		default: 'sms',
+	},
+];
 
 export class Seven implements INodeType {
 	description: INodeTypeDescription = {
@@ -25,7 +53,7 @@ export class Seven implements INodeType {
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		credentials: [
-/*			{
+			/*			{
 				name: 'sevenApi',
 				required: true,
 				displayOptions: {
@@ -37,7 +65,7 @@ export class Seven implements INodeType {
 			{
 				name: 'sevenOAuth2Api',
 				required: true,
-/*				displayOptions: {
+				/*				displayOptions: {
 					show: {
 						authentication: ['oAuth2'],
 					},
@@ -45,7 +73,7 @@ export class Seven implements INodeType {
 			},
 		],
 		properties: [
-/*			{
+			/*			{
 				displayName: 'Authentication',
 				name: 'authentication',
 				type: 'options',
@@ -62,247 +90,13 @@ export class Seven implements INodeType {
 				default: 'accessToken',
 				description: 'Means of authenticating with the service',
 			},*/
-			{
-				displayName: 'Resource',
-				name: 'resource',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{
-						name: 'SMS',
-						value: 'sms',
-					},
-					{
-						name: 'Voice Call',
-						value: 'voice',
-					},
-					{
-						name: 'RCS Message',
-						value: 'rcs',
-					},
-				],
-				default: 'sms',
-			},
-
-			// operations
-			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: ['sms'],
-					},
-				},
-				options: [
-					{
-						name: 'Send',
-						value: 'send',
-						description: 'Send SMS',
-						action: 'Send an SMS',
-					},
-				],
-				default: 'send',
-			},
-			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: ['voice'],
-					},
-				},
-				options: [
-					{
-						name: 'Send',
-						value: 'send',
-						description: 'Converts text to voice and calls a given number',
-						action: 'Convert text to voice',
-					},
-				],
-				default: 'send',
-			},
-			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: ['rcs'],
-					},
-				},
-				options: [
-					{
-						name: 'Send',
-						value: 'send',
-						description: 'Send a RCS message',
-						action: 'Send RCS',
-					},
-				],
-				default: 'send',
-			},
-			{
-				displayName: 'From',
-				name: 'from',
-				type: 'string',
-				default: '',
-				placeholder: '+4901234567890',
-				displayOptions: {
-					show: {
-						operation: ['send'],
-						resource: ['sms'],
-					},
-				},
-				description:
-					'The caller ID displayed in the receivers display. Max 16 numeric or 11 alphanumeric characters.',
-			},
-			{
-				displayName: 'To',
-				name: 'to',
-				type: 'string',
-				default: '',
-				placeholder: '+49876543210, MyGroup',
-				required: true,
-				displayOptions: {
-					show: {
-						operation: ['send'],
-						resource: ['sms', 'voice', 'rcs'],
-					},
-				},
-				description:
-					'The number of your recipient(s) separated by comma. Can be regular numbers or contact/groups from seven.',
-			},
-			{
-				displayName: 'Message',
-				name: 'message',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						operation: ['send'],
-						resource: ['sms', 'voice', 'rcs'],
-					},
-				},
-				description: 'The message to send',
-			},
-			{
-				displayName: 'Options',
-				name: 'options',
-				type: 'collection',
-				placeholder: 'Add Option',
-				default: {},
-				displayOptions: {
-					show: {
-						operation: ['send'],
-						resource: ['sms'],
-					},
-				},
-				options: [
-					{
-						displayName: 'Delay',
-						name: 'delay',
-						type: 'dateTime',
-						default: '',
-						description: 'Pick a date for time delayed dispatch',
-					},
-					{
-						displayName: 'Flash',
-						name: 'flash',
-						type: 'boolean',
-						default: false,
-						// eslint-disable-next-line n8n-nodes-base/node-param-description-boolean-without-whether
-						description: "Send as flash message being displayed directly the receiver's display",
-					},
-					{
-						displayName: 'Foreign ID',
-						name: 'foreign_id',
-						type: 'string',
-						default: '',
-						placeholder: 'MyCustomForeignID',
-						description: 'Custom foreign ID returned in DLR callbacks',
-					},
-					{
-						displayName: 'Label',
-						name: 'label',
-						type: 'string',
-						default: '',
-						placeholder: 'MyCustomLabel',
-						description: 'Custom label used to group analytics',
-					},
-					{
-						displayName: 'Performance Tracking',
-						name: 'performance_tracking',
-						type: 'boolean',
-						default: false,
-						description:
-							'Whether to enable performance tracking for URLs found in the message text',
-					},
-					{
-						displayName: 'TTL',
-						name: 'ttl',
-						type: 'number',
-						default: 2880,
-						typeOptions: {
-							minValue: 1,
-						},
-						description:
-							'Custom time to live specifying the validity period of a message in minutes',
-					},
-				],
-			},
-			{
-				displayName: 'Options',
-				name: 'options',
-				type: 'collection',
-				placeholder: 'Add Option',
-				default: {},
-				displayOptions: {
-					show: {
-						operation: ['send'],
-						resource: ['voice'],
-					},
-				},
-				options: [
-					{
-						displayName: 'From',
-						name: 'from',
-						type: 'string',
-						default: '',
-						placeholder: '+4901234567890',
-						description:
-							'The caller ID. Please use only verified sender IDs, one of your virtual inbound numbers or one of our shared virtual numbers.',
-					},
-				],
-			},
-			{
-				displayName: 'Options',
-				name: 'options',
-				type: 'collection',
-				placeholder: 'Add Option',
-				default: {},
-				displayOptions: {
-					show: {
-						operation: ['send'],
-						resource: ['rcs'],
-					},
-				},
-				options: [
-					{
-						displayName: 'From',
-						name: 'from',
-						type: 'string',
-						default: '',
-						placeholder: 'agent_teqt3qt32j9t',
-						description:
-							'The unique ID of your agent. You can view this in the Settings of your account. If not specified, the first RCS-capable sender will be used.',
-					},
-				],
-			},
+			...resources,
+			...smsOperations,
+			...smsFields,
+			...rcsOperations,
+			...rcsFields,
+			...voiceOperations,
+			...voiceFields
 		],
 	};
 
@@ -318,7 +112,7 @@ export class Seven implements INodeType {
 					if (operation === 'send') {
 						const from = this.getNodeParameter('from', i) as string;
 						const to = this.getNodeParameter('to', i) as string;
-						const text = this.getNodeParameter('message', i) as string;
+						const text = this.getNodeParameter('text', i) as string;
 						const options = this.getNodeParameter('options', i);
 						const body = {
 							from,
