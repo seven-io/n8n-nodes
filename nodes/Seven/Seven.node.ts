@@ -39,6 +39,13 @@ const resources: INodeProperties[] = [
 
 export class Seven implements INodeType {
 	description: INodeTypeDescription = {
+		requestDefaults: {
+			baseURL: 'https://gateway.seven.io/api',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+			},
+		},
 		displayName: 'seven',
 		name: 'seven',
 		icon: 'file:seven.svg',
@@ -96,7 +103,7 @@ export class Seven implements INodeType {
 			...rcsOperations,
 			...rcsFields,
 			...voiceOperations,
-			...voiceFields
+			...voiceFields,
 		],
 	};
 
@@ -108,48 +115,46 @@ export class Seven implements INodeType {
 			const operation = this.getNodeParameter('operation', i);
 			let responseData;
 			try {
-				if (resource === 'sms') {
-					if (operation === 'send') {
-						const from = this.getNodeParameter('from', i) as string;
-						const to = this.getNodeParameter('to', i) as string;
-						const text = this.getNodeParameter('text', i) as string;
-						const options = this.getNodeParameter('options', i);
-						const body = {
-							from,
-							to,
-							text,
-							...options,
-						};
-						responseData = await sevenApiRequest.call(this, 'POST', '/sms', body);
-					}
+				if (resource === 'sms' && operation === 'send' ) {
+					const from = this.getNodeParameter('from', i) as string;
+					const to = this.getNodeParameter('to', i) as string;
+					const text = this.getNodeParameter('text', i) as string;
+					const options = this.getNodeParameter('options', i);
+					const body = {
+						from,
+						to,
+						text,
+						...options,
+					};
+					responseData = await sevenApiRequest.call(this, 'POST', '/sms', body);
 				}
 
-				if (resource === 'voice') {
-					if (operation === 'send') {
-						const to = this.getNodeParameter('to', i) as string;
-						const text = this.getNodeParameter('message', i) as string;
-						const options = this.getNodeParameter('options', i);
-						const body = {
-							to,
-							text,
-							...options,
-						};
-						responseData = await sevenApiRequest.call(this, 'POST', '/voice', body);
-					}
+				if (resource === 'voice' && operation === 'send') {
+					const from = this.getNodeParameter('from', i) as string;
+					const to = this.getNodeParameter('to', i) as string;
+					const text = this.getNodeParameter('message', i) as string;
+					const options = this.getNodeParameter('options', i);
+					const body = {
+						from,
+						to,
+						text,
+						...options,
+					};
+					responseData = await sevenApiRequest.call(this, 'POST', '/voice', body);
 				}
 
-				if (resource === 'rcs') {
-					if (operation === 'send') {
-						const to = this.getNodeParameter('to', i) as string;
-						const text = this.getNodeParameter('message', i) as string;
-						const options = this.getNodeParameter('options', i);
-						const body = {
-							to,
-							text,
-							...options,
-						};
-						responseData = await sevenApiRequest.call(this, 'POST', '/rcs/messages', body);
-					}
+				if (resource === 'rcs' && operation === 'send') {
+					const from = this.getNodeParameter('from', i) as string;
+					const to = this.getNodeParameter('to', i) as string;
+					const text = this.getNodeParameter('message', i) as string;
+					const options = this.getNodeParameter('options', i);
+					const body = {
+						from,
+						to,
+						text,
+						...options,
+					};
+					responseData = await sevenApiRequest.call(this, 'POST', '/rcs/messages', body);
 				}
 
 				if (Array.isArray(responseData)) {
