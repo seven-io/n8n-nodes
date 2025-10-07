@@ -63,6 +63,21 @@ const lookupStartProperties: INodeProperties[] = [
 		},
 		description: 'The phone number for looking up',
 	},
+	{
+		displayName: 'From',
+		name: 'from',
+		type: 'string',
+		default: '',
+		placeholder: 'AgentABC',
+		displayOptions: {
+			show: {
+				operation: ['rcs'],
+				resource: ['lookup'],
+			},
+		},
+		description:
+			'To check the RCS capabilities of a phone number, the respective agent identifier is always required. By default, our API uses the first RCS sender ID in your account. You can use a different agent with this parameter.',
+	},
 ];
 
 export const lookupFields: INodeProperties[] = [...lookupStartProperties];
