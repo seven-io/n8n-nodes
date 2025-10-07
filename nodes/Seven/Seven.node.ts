@@ -12,6 +12,7 @@ import { sevenApiRequest } from './GenericFunctions';
 import { smsFields, smsOperations } from './description/SmsDescription';
 import { rcsFields, rcsOperations } from './description/RcsDescription';
 import { voiceFields, voiceOperations } from './description/VoiceDescription';
+import { lookupFields, lookupOperations } from './description/LookupDescription';
 
 const resources: INodeProperties[] = [
 	{
@@ -104,6 +105,8 @@ export class Seven implements INodeType {
 			...rcsFields,
 			...voiceOperations,
 			...voiceFields,
+			...lookupOperations,
+			...lookupFields
 		],
 	};
 
@@ -155,6 +158,17 @@ export class Seven implements INodeType {
 						...options,
 					};
 					responseData = await sevenApiRequest.call(this, 'POST', '/rcs/messages', body);
+				}
+
+				if (resource === 'lookup') {
+					const number = this.getNodeParameter('number', i) as string;
+					responseData = await sevenApiRequest.call(
+						this,
+						'GET',
+						`/lookup/${operation}`,
+						{},
+						{ number },
+					);
 				}
 
 				if (Array.isArray(responseData)) {
