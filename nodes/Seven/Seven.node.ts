@@ -60,7 +60,7 @@ export class Seven implements INodeType {
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		credentials: [
-			/*			{
+			{
 				name: 'sevenApi',
 				required: true,
 				displayOptions: {
@@ -68,19 +68,19 @@ export class Seven implements INodeType {
 						authentication: ['accessToken'],
 					},
 				},
-			},*/
+			},
 			{
 				name: 'sevenOAuth2Api',
 				required: true,
-				/*				displayOptions: {
+				displayOptions: {
 					show: {
 						authentication: ['oAuth2'],
 					},
-				},*/
+				},
 			},
 		],
 		properties: [
-			/*			{
+			{
 				displayName: 'Authentication',
 				name: 'authentication',
 				type: 'options',
@@ -96,7 +96,7 @@ export class Seven implements INodeType {
 				],
 				default: 'accessToken',
 				description: 'Means of authenticating with the service',
-			},*/
+			},
 			...resources,
 			...smsOperations,
 			...smsFields,
@@ -115,7 +115,7 @@ export class Seven implements INodeType {
 			const operation = this.getNodeParameter('operation', i);
 			let responseData;
 			try {
-				if (resource === 'sms' && operation === 'send' ) {
+				if (resource === 'sms' && operation === 'send') {
 					const from = this.getNodeParameter('from', i) as string;
 					const to = this.getNodeParameter('to', i) as string;
 					const text = this.getNodeParameter('text', i) as string;
