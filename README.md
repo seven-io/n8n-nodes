@@ -1,48 +1,82 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+<p align="center">
+  <img src="https://www.seven.io/wp-content/uploads/Logo.svg" width="250" alt="seven logo" />
+</p>
 
-# n8n-nodes-starter
+<h1 align="center">seven Nodes for n8n</h1>
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](https://n8n.io). It includes the node linter and other dependencies.
+<p align="center">
+  Official community node for <a href="https://n8n.io">n8n</a> that lets you send SMS, place text-to-speech calls and run number lookups via the seven gateway.
+</p>
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+<p align="center">
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-teal.svg" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/n8n-nodes-seven"><img src="https://img.shields.io/npm/v/n8n-nodes-seven" alt="npm" /></a>
+  <img src="https://img.shields.io/badge/n8n-community%20node-ea4b71" alt="n8n community node" />
+  <img src="https://img.shields.io/badge/Node.js-20.15%2B-brightgreen" alt="Node.js 20.15+" />
+</p>
 
-If you would like your node to be available on n8n cloud you can also [submit your node for verification](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/).
+---
+
+## Features
+
+- **Seven Node** - Drop-in n8n node with operations for SMS, Voice and number lookups
+- **API-Key or OAuth2** - Authenticate with `SevenApi` (API key) or `SevenOAuth2Api` (OAuth2)
+- **Submit-on-Save Forms** - Standard n8n parameter UI for every operation
 
 ## Prerequisites
 
-You need the following installed on your development machine:
+- A self-hosted [n8n](https://n8n.io) instance
+- A [seven account](https://www.seven.io/) with API key ([How to get your API key](https://help.seven.io/en/developer/where-do-i-find-my-api-key))
 
-* [git](https://git-scm.com/downloads)
-* Node.js and npm. Minimum version Node 20. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
-  ```
-  npm install n8n -g
-  ```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+## Installation
 
-## Using this starter
+### From the n8n community node manager
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
+In n8n, go to **Settings > Community Nodes**, install `n8n-nodes-seven`.
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
-   ```
-   git clone https://github.com/<your organization>/<your-repo-name>.git
-   ```
-3. Run `npm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `npm run lint` to check for errors or `npm run lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
+### Manual
 
-## More information
+```bash
+cd ~/.n8n/custom
+npm install n8n-nodes-seven
+```
 
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
+Restart n8n so the node appears in the palette.
+
+## Configuration
+
+Add credentials in **Credentials > New** and pick either:
+
+| Credential | When to use |
+|------------|-------------|
+| `SevenApi` | Plain API-key auth (most users) |
+| `SevenOAuth2Api` | OAuth2-based auth (multi-tenant setups) |
+
+Reference the credential in any *Seven* node.
+
+## Operations
+
+The Seven node exposes the seven REST API as discrete operations:
+
+- **SMS** - Send SMS, schedule, flash, performance tracking
+- **Voice** - Place text-to-speech calls
+- **Lookup** - HLR / MNP / CNAM / Format
+
+See `nodes/Seven/description/` in the source for the full per-operation parameter list.
+
+## Development
+
+```bash
+npm install
+npm run dev          # tsc watch
+npm run build        # production build + icon copy
+npm run lint         # eslint
+```
+
+## Support
+
+Need help? Feel free to [contact us](https://www.seven.io/en/company/contact/) or [open an issue](https://github.com/seven-io/n8n-nodes/issues).
 
 ## License
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+[MIT](LICENSE.md)
