@@ -123,11 +123,14 @@ export class SevenTrigger implements INodeType {
 						description: 'Optional filter expression applied to webhook deliveries',
 					},
 					{
-						displayName: 'Custom Headers (JSON)',
+						displayName: 'Custom Headers',
 						name: 'headers',
-						type: 'json',
+						type: 'string',
+						typeOptions: { rows: 3 },
 						default: '',
-						description: 'Custom headers to send with webhook requests',
+						placeholder: 'Authorization: Basic dXNlcjpwYXNz',
+						description:
+							'Custom headers to send with webhook requests, one per line as "Header-Name: value"',
 					},
 				],
 			},
@@ -147,6 +150,7 @@ export class SevenTrigger implements INodeType {
 				const matching = hooks.filter(
 					(hook) =>
 						hook.target_url === webhookUrl &&
+						hook.enabled !== false &&
 						(hook.event_type === 'all' || events.includes(hook.event_type as string)),
 				);
 
@@ -178,6 +182,7 @@ export class SevenTrigger implements INodeType {
 				const existing = hooks.filter(
 					(hook) =>
 						hook.target_url === webhookUrl &&
+						hook.enabled !== false &&
 						(hook.event_type === 'all' || events.includes(hook.event_type as string)),
 				);
 				const coveredEvents = new Set(existing.map((hook) => hook.event_type as string));
@@ -201,10 +206,13 @@ export class SevenTrigger implements INodeType {
 					};
 					if (additionalFields.event_filter) body.event_filter = additionalFields.event_filter;
 					if (additionalFields.headers) {
+						// The hooks API expects newline-separated "Header-Name: value" lines
 						body.headers =
 							typeof additionalFields.headers === 'string'
 								? additionalFields.headers
-								: JSON.stringify(additionalFields.headers);
+								: Object.entries(additionalFields.headers as IDataObject)
+										.map(([name, value]) => `${name}: ${String(value)}`)
+										.join('\n');
 					}
 
 					const response = (await sevenApiRequest.call(

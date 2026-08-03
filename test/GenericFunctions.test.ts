@@ -52,6 +52,24 @@ describe('seven v2 -> sevenApiRequest', () => {
 		});
 	});
 
+	it('throws on legacy string success codes other than "100"', async () => {
+		const ctx = buildContext({ success: '202' });
+
+		await expect(
+			sevenApiRequest.call(ctx, 'POST', '/sms', { to: 'x', text: 'y' }),
+		).rejects.toMatchObject({
+			name: 'NodeApiError',
+		});
+	});
+
+	it('accepts the legacy success code "100"', async () => {
+		const ctx = buildContext({ success: '100', messages: [] });
+
+		await expect(sevenApiRequest.call(ctx, 'POST', '/sms', { to: 'x', text: 'y' })).resolves.toEqual(
+			{ success: '100', messages: [] },
+		);
+	});
+
 	it('passes through responses without a success field', async () => {
 		const ctx = buildContext({ amount: 12.34 });
 

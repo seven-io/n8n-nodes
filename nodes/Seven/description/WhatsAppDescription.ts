@@ -392,7 +392,6 @@ export const whatsappFields: INodeProperties[] = [
 		name: 'emoji',
 		type: 'string',
 		default: '',
-		required: true,
 		displayOptions: {
 			show: {
 				resource: ['whatsapp'],
@@ -400,6 +399,6 @@ export const whatsappFields: INodeProperties[] = [
 				event: ['reaction'],
 			},
 		},
-		description: 'Reaction emoji. Empty string removes the reaction.',
+		description: 'Reaction emoji. Leave empty to remove an existing reaction.',
 	},
 ];

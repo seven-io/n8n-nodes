@@ -85,6 +85,28 @@ describe('SevenTrigger lifecycle', () => {
 			expect(staticData.hookIds).toBeUndefined();
 		});
 
+		it('ignores disabled hooks when checking coverage', async () => {
+			apiRequestSpy.mockResolvedValueOnce({
+				hooks: [
+					{
+						id: 1,
+						target_url: 'https://n8n.example/webhook/abc',
+						event_type: 'sms_mo',
+						enabled: false,
+					},
+					{ id: 2, target_url: 'https://n8n.example/webhook/abc', event_type: 'dlr' },
+				],
+			});
+			const { ctx, staticData } = makeHookContext({ events: ['sms_mo', 'dlr'] });
+
+			const result = await trigger.webhookMethods.default.checkExists.call(
+				ctx as unknown as IHookFunctions,
+			);
+
+			expect(result).toBe(false);
+			expect(staticData.hookIds).toBeUndefined();
+		});
+
 		it('treats an event_type=all hook as covering every selected event', async () => {
 			apiRequestSpy.mockResolvedValueOnce({
 				hooks: [{ id: 7, target_url: 'https://n8n.example/webhook/abc', event_type: 'all' }],

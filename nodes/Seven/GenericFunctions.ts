@@ -60,12 +60,16 @@ export async function sevenApiRequest(
 		throw new NodeApiError(this.getNode(), error as JsonObject);
 	}
 
-	// Some endpoints report failures with HTTP 200 and { success: false, ... }.
-	// Responses without a success field pass through untouched.
-	if (response !== null && typeof response === 'object' && response.success === false) {
-		throw new NodeApiError(this.getNode(), response as JsonObject, {
-			message: 'The seven API reported a failure',
-		});
+	// Some endpoints report failures with HTTP 200: either { success: false, ... }
+	// or a legacy string status code where only "100" means accepted (SMS, Voice,
+	// RCS, WhatsApp sends). Responses without a success field pass through untouched.
+	if (response !== null && typeof response === 'object') {
+		const success = (response as IDataObject).success;
+		if (success === false || (typeof success === 'string' && success !== '100')) {
+			throw new NodeApiError(this.getNode(), response as JsonObject, {
+				message: 'The seven API reported a failure',
+			});
+		}
 	}
 
 	return response;
