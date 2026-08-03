@@ -116,8 +116,11 @@ export class Seven implements INodeType {
 				} else if (resource === 'rcs') {
 					if (operation === 'send') {
 						const additionalFields = this.getNodeParameter('additionalFields', i, {});
-						const richContent = additionalFields.richContent;
+						let richContent = additionalFields.richContent;
 						delete additionalFields.richContent;
+						if (typeof richContent === 'string' && richContent) {
+							richContent = jsonParse<IDataObject>(richContent);
+						}
 
 						const body: IDataObject = {
 							to: this.getNodeParameter('to', i),
