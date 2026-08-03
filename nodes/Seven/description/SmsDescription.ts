@@ -1,4 +1,4 @@
-import { INodeProperties } from 'n8n-workflow';
+import type { INodeProperties } from 'n8n-workflow';
 
 export const smsOperations: INodeProperties[] = [
 	{
@@ -15,70 +15,64 @@ export const smsOperations: INodeProperties[] = [
 			{
 				name: 'Send',
 				value: 'send',
-				description: 'Send SMS',
+				description: 'Send an SMS',
 				action: 'Send an SMS',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				description: 'Delete a scheduled SMS before it has been sent',
+				action: 'Delete a scheduled SMS',
 			},
 		],
 		default: 'send',
 	},
 ];
 
-const smsSendProperties: INodeProperties[] = [
-	{
-		displayName: 'Text',
-		name: 'text',
-		type: 'string',
-		default: '',
-		required: true,
-		displayOptions: {
-			show: {
-				operation: ['send'],
-				resource: ['sms'],
-			},
-		},
-		description: 'The message to send',
-	},
+export const smsFields: INodeProperties[] = [
 	{
 		displayName: 'To',
 		name: 'to',
 		type: 'string',
 		default: '',
-		placeholder: '+49876543210, MyGroup',
+		placeholder: '+49170123456789, MyGroup',
 		required: true,
 		displayOptions: {
 			show: {
-				operation: ['send'],
 				resource: ['sms'],
+				operation: ['send'],
 			},
 		},
 		description:
-			'The number of your recipient(s) separated by comma. Can be regular numbers or contact/groups from seven.',
+			'Recipient phone number(s) in E.164 format, separated by commas. Also accepts contact or group names.',
 	},
 	{
-		displayName: 'From',
-		name: 'from',
+		displayName: 'Text',
+		name: 'text',
 		type: 'string',
+		typeOptions: {
+			rows: 4,
+		},
 		default: '',
-		placeholder: '+4901234567890',
+		required: true,
 		displayOptions: {
 			show: {
-				operation: ['send'],
 				resource: ['sms'],
+				operation: ['send'],
 			},
 		},
-		description:
-			'The caller ID displayed in the receivers display. Max 16 numeric or 11 alphanumeric characters.',
+		description: 'Message content. Max. 1520 characters.',
 	},
 	{
-		displayName: 'Options',
-		name: 'options',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
 		type: 'collection',
-		placeholder: 'Add Option',
+		placeholder: 'Add Field',
 		default: {},
 		displayOptions: {
 			show: {
-				operation: ['send'],
 				resource: ['sms'],
+				operation: ['send'],
 			},
 		},
 		options: [
@@ -87,44 +81,57 @@ const smsSendProperties: INodeProperties[] = [
 				name: 'delay',
 				type: 'dateTime',
 				default: '',
-				description: 'Pick a date for time delayed dispatch',
+				description: 'Schedule send time (Unix timestamp or YYYY-MM-DD hh:mm:ss)',
 			},
 			{
 				displayName: 'Flash',
 				name: 'flash',
 				type: 'boolean',
 				default: false,
-				// eslint-disable-next-line n8n-nodes-base/node-param-description-boolean-without-whether
-				description: "Send as flash message being displayed directly the receiver's display",
+				description: 'Whether to send as flash SMS displayed directly on receiver screen',
 			},
 			{
 				displayName: 'Foreign ID',
-				typeOptions: {
-					maxValue: 64,
-				},
 				name: 'foreign_id',
 				type: 'string',
 				default: '',
-				placeholder: 'MyCustomForeignID',
-				description: 'Custom foreign ID returned in DLR callbacks',
+				description: 'Custom message identifier returned in DLR callbacks (max 64 characters)',
+			},
+			{
+				displayName: 'From',
+				name: 'from',
+				type: 'string',
+				default: '',
+				placeholder: 'seven',
+				description: 'Sender ID (max 11 alphanumeric or 16 numeric characters)',
+			},
+			{
+				displayName: 'Get Replies',
+				name: 'get_replies',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to enable 48-hour reply functionality',
+			},
+			{
+				displayName: 'Is Binary',
+				name: 'is_binary',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to send as binary data',
 			},
 			{
 				displayName: 'Label',
 				name: 'label',
 				type: 'string',
-				typeOptions: {
-					maxValue: 100,
-				},
 				default: '',
-				placeholder: 'MyCustomLabel',
-				description: 'Custom label used to group analytics',
+				description: 'Custom label for grouping analytics (max 100 characters)',
 			},
 			{
 				displayName: 'Performance Tracking',
 				name: 'performance_tracking',
 				type: 'boolean',
 				default: false,
-				description: 'Whether to enable performance tracking for URLs found in the message text',
+				description: 'Whether to enable URL shortening and click tracking',
 			},
 			{
 				displayName: 'TTL',
@@ -134,12 +141,30 @@ const smsSendProperties: INodeProperties[] = [
 				typeOptions: {
 					minValue: 1,
 				},
-				description: 'Custom time to live specifying the validity period of a message in minutes',
+				description: 'Validity period in minutes (default 2880 = 48h)',
+			},
+			{
+				displayName: 'UDH',
+				name: 'udh',
+				type: 'string',
+				default: '',
+				description: 'Custom User Data Header for binary SMS',
 			},
 		],
 	},
-];
-
-export const smsFields: INodeProperties[] = [
-	...smsSendProperties
+	{
+		displayName: 'Message IDs',
+		name: 'ids',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: '1234567,8901234',
+		displayOptions: {
+			show: {
+				resource: ['sms'],
+				operation: ['delete'],
+			},
+		},
+		description: 'Comma-separated list of message IDs to delete (only works for scheduled SMS)',
+	},
 ];

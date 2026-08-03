@@ -5,7 +5,7 @@
 <h1 align="center">seven Nodes for n8n</h1>
 
 <p align="center">
-  Official community node for <a href="https://n8n.io">n8n</a> that lets you send SMS, place text-to-speech calls and run number lookups via the seven gateway.
+  Official community nodes for <a href="https://n8n.io">n8n</a>: send SMS, RCS and WhatsApp messages, place text-to-speech calls, run number lookups, manage contacts, groups, numbers and subaccounts - and react to inbound events with the seven Trigger.
 </p>
 
 <p align="center">
@@ -19,9 +19,10 @@
 
 ## Features
 
-- **Seven Node** - Drop-in n8n node with operations for SMS, Voice and number lookups
+- **seven Node** - Full API coverage: SMS, Voice, RCS, WhatsApp, Lookup, Account, Journal, Sender Identifier, Numbers, Contacts, Groups and Subaccounts
+- **seven Trigger Node** - Webhook trigger for inbound SMS, delivery reports (DLR), voice events, RCS and WhatsApp, with optional HMAC-SHA256 signature verification
 - **API-Key or OAuth2** - Authenticate with `SevenApi` (API key) or `SevenOAuth2Api` (OAuth2)
-- **Submit-on-Save Forms** - Standard n8n parameter UI for every operation
+- **Usable as AI tool** - The seven node can be used as a tool by n8n AI agents
 
 ## Prerequisites
 
@@ -52,15 +53,26 @@ Add credentials in **Credentials > New** and pick either:
 | `SevenApi` | Plain API-key auth (most users) |
 | `SevenOAuth2Api` | OAuth2-based auth (multi-tenant setups) |
 
-Reference the credential in any *Seven* node.
+Reference the credential in any *seven* node.
 
 ## Operations
 
-The Seven node exposes the seven REST API as discrete operations:
+The seven node exposes the seven REST API as discrete operations:
 
-- **SMS** - Send SMS, schedule, flash, performance tracking
-- **Voice** - Place text-to-speech calls
-- **Lookup** - HLR / MNP / CNAM / Format
+- **SMS** - Send (schedule, flash, performance tracking, ...) and delete
+- **Voice** - Place text-to-speech calls, hang up running calls
+- **RCS** - Send messages and rich content, send events, revoke messages
+- **WhatsApp** - Send text, template, media, location, contacts and interactive messages, send events, delete messages
+- **Lookup** - HLR / MNP / CNAM / Format / RCS capabilities
+- **Account** - Balance, pricing, analytics
+- **Journal** - Outbound, inbound and voice history
+- **Sender Identifier** - Validate caller IDs for voice
+- **Number** - Browse available numbers, order, update and delete active numbers
+- **Contact** - Full CRUD with pagination
+- **Group** - Full CRUD with pagination
+- **Subaccount** - Create, list, auto-transfer, credit transfer, delete
+
+The seven Trigger node subscribes to webhooks for these events: inbound SMS, delivery reports (DLR), performance tracking, voice call / status / DTMF, RCS and inbound WhatsApp. Optionally verifies the `X-Signature` header with your signing key.
 
 See `nodes/Seven/description/` in the source for the full per-operation parameter list.
 
@@ -71,6 +83,7 @@ npm install
 npm run dev          # tsc watch
 npm run build        # production build + icon copy
 npm run lint         # eslint
+npm test             # jest unit tests
 ```
 
 ## Support

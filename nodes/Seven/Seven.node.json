@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-base.Seven",
+	"node": "n8n-nodes-seven.seven",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Communication"],
