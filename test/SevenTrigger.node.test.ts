@@ -70,10 +70,38 @@ describe('SevenTrigger lifecycle', () => {
 			expect(result).toBe(true);
 			expect(staticData.hookIds).toEqual([1, 2]);
 		});
+
+		it('returns false when only some selected events are covered', async () => {
+			apiRequestSpy.mockResolvedValueOnce({
+				hooks: [{ id: 1, target_url: 'https://n8n.example/webhook/abc', event_type: 'sms_mo' }],
+			});
+			const { ctx, staticData } = makeHookContext({ events: ['sms_mo', 'dlr'] });
+
+			const result = await trigger.webhookMethods.default.checkExists.call(
+				ctx as unknown as IHookFunctions,
+			);
+
+			expect(result).toBe(false);
+			expect(staticData.hookIds).toBeUndefined();
+		});
+
+		it('treats an event_type=all hook as covering every selected event', async () => {
+			apiRequestSpy.mockResolvedValueOnce({
+				hooks: [{ id: 7, target_url: 'https://n8n.example/webhook/abc', event_type: 'all' }],
+			});
+			const { ctx, staticData } = makeHookContext({ events: ['sms_mo', 'dlr'] });
+
+			const result = await trigger.webhookMethods.default.checkExists.call(
+				ctx as unknown as IHookFunctions,
+			);
+
+			expect(result).toBe(true);
+			expect(staticData.hookIds).toEqual([7]);
+		});
 	});
 
 	describe('create', () => {
-		it('subscribes one hook per selected event with request_method=json', async () => {
+		it('subscribes one hook per selected event with request_method=JSON', async () => {
 			apiRequestSpy.mockResolvedValueOnce({ id: 11 }).mockResolvedValueOnce({ id: 12 });
 
 			const { ctx, staticData } = makeHookContext({ events: ['sms_mo', 'dlr'] });
@@ -91,7 +119,7 @@ describe('SevenTrigger lifecycle', () => {
 				expect.objectContaining({
 					target_url: 'https://n8n.example/webhook/abc',
 					event_type: 'sms_mo',
-					request_method: 'json',
+					request_method: 'JSON',
 				}),
 			);
 			expect(staticData.hookIds).toEqual([11, 12]);
@@ -153,7 +181,7 @@ describe('SevenTrigger lifecycle', () => {
 			expect(staticData.hookIds).toBeUndefined();
 		});
 
-		it('continues deleting remaining hooks if one fails', async () => {
+		it('continues deleting remaining hooks if one fails and retains the failed ID', async () => {
 			apiRequestSpy
 				.mockResolvedValueOnce({ success: true })
 				.mockRejectedValueOnce(new Error('boom'))
@@ -167,9 +195,9 @@ describe('SevenTrigger lifecycle', () => {
 				ctx as unknown as IHookFunctions,
 			);
 
-			expect(result).toBe(true);
+			expect(result).toBe(false);
 			expect(apiRequestSpy).toHaveBeenCalledTimes(3);
-			expect(staticData.hookIds).toBeUndefined();
+			expect(staticData.hookIds).toEqual([12]);
 		});
 	});
 });

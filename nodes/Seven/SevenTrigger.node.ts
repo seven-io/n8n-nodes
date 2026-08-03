@@ -139,26 +139,27 @@ export class SevenTrigger implements INodeType {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
 				const webhookUrl = this.getNodeWebhookUrl('default') as string;
 				const events = this.getNodeParameter('events') as string[];
-				const eventType = events.length === ALL_EVENTS.length ? 'all' : events[0];
 				const webhookData = this.getWorkflowStaticData('node');
 
 				const response = (await sevenApiRequest.call(this, 'GET', '/hooks')) as IDataObject;
 				const hooks = (response?.hooks as IDataObject[]) ?? [];
 
-				const existingIds: number[] = [];
-				for (const hook of hooks) {
-					if (
+				const matching = hooks.filter(
+					(hook) =>
 						hook.target_url === webhookUrl &&
-						(events.includes(hook.event_type as string) ||
-							(eventType === 'all' && hook.event_type === 'all'))
-					) {
-						existingIds.push(hook.id as number);
-					}
-				}
+						(hook.event_type === 'all' || events.includes(hook.event_type as string)),
+				);
 
-				if (existingIds.length === 0) return false;
+				// Only report the webhook as existing when every selected event is
+				// covered - otherwise create() must run to subscribe the missing ones.
+				const coveredEvents = new Set(matching.map((hook) => hook.event_type as string));
+				const allCovered =
+					events.length > 0 &&
+					(coveredEvents.has('all') || events.every((event) => coveredEvents.has(event)));
 
-				webhookData.hookIds = existingIds;
+				if (!allCovered) return false;
+
+				webhookData.hookIds = matching.map((hook) => hook.id as number);
 				return true;
 			},
 
@@ -177,7 +178,7 @@ export class SevenTrigger implements INodeType {
 					const body: IDataObject = {
 						target_url: webhookUrl,
 						event_type: eventType,
-						request_method: 'json',
+						request_method: 'JSON',
 					};
 					if (additionalFields.event_filter) body.event_filter = additionalFields.event_filter;
 					if (additionalFields.headers) {
@@ -208,12 +209,20 @@ export class SevenTrigger implements INodeType {
 				const webhookData = this.getWorkflowStaticData('node');
 				const ids = (webhookData.hookIds as number[] | undefined) ?? [];
 
+				const failedIds: number[] = [];
 				for (const id of ids) {
 					try {
 						await sevenApiRequest.call(this, 'DELETE', '/hooks', { id });
 					} catch {
-						// continue deleting the remaining hooks
+						failedIds.push(id);
 					}
+				}
+
+				// Keep IDs whose unsubscribe failed so the orphaned remote hooks
+				// stay tracked and the deletion can be retried.
+				if (failedIds.length > 0) {
+					webhookData.hookIds = failedIds;
+					return false;
 				}
 
 				delete webhookData.hookIds;

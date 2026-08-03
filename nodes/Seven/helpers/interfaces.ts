@@ -45,7 +45,7 @@ export interface SevenContactBody extends IDataObject {
 	home_number?: string;
 	email?: string;
 	address?: string;
-	postal_code?: number;
+	postal_code?: string;
 	city?: string;
 	birthday?: string;
 	notes?: string;

@@ -60,7 +60,7 @@ const contactFieldOptions: INodeProperties[] = [
 		placeholder: 'name@example.com',
 	},
 	{ displayName: 'Address', name: 'address', type: 'string', default: '' },
-	{ displayName: 'Postal Code', name: 'postal_code', type: 'number', default: 0 },
+	{ displayName: 'Postal Code', name: 'postal_code', type: 'string', default: '' },
 	{ displayName: 'City', name: 'city', type: 'string', default: '' },
 	{
 		displayName: 'Birthday',
