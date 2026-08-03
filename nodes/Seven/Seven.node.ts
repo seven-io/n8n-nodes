@@ -375,7 +375,7 @@ async function executeContactOperation(
 	if (operation === 'create') {
 		const payload = this.getNodeParameter('contactPayload', i, {}) as IDataObject;
 		const body = normalizeContactPayload(payload);
-		return (await sevenApiRequest.call(this, 'POST', '/contacts', body)) as IDataObject;
+		return (await sevenApiRequest.call(this, 'POST', '/contacts', body, {}, true)) as IDataObject;
 	}
 	const contactId = this.getNodeParameter('contactId', i) as string;
 	const path = `/contacts/${encodeURIComponent(contactId)}`;
@@ -419,9 +419,14 @@ async function executeGroupOperation(
 		return Array.isArray(response) ? response : ((response.data as IDataObject[]) ?? response);
 	}
 	if (operation === 'create') {
-		return (await sevenApiRequest.call(this, 'POST', '/groups', {
-			name: this.getNodeParameter('name', i),
-		})) as IDataObject;
+		return (await sevenApiRequest.call(
+			this,
+			'POST',
+			'/groups',
+			{ name: this.getNodeParameter('name', i) },
+			{},
+			true,
+		)) as IDataObject;
 	}
 	const groupId = this.getNodeParameter('groupId', i) as string;
 	const path = `/groups/${encodeURIComponent(groupId)}`;

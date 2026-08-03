@@ -32,6 +32,7 @@ export async function sevenApiRequest(
 	endpoint: string,
 	body: IDataObject = {},
 	qs: IDataObject = {},
+	sendAsForm = false,
 ): Promise<any> {
 	const options: IRequestOptions = {
 		method,
@@ -46,7 +47,13 @@ export async function sevenApiRequest(
 	};
 
 	if (Object.keys(body).length > 0) {
-		options.body = body;
+		// POST /contacts and POST /groups only read form-encoded bodies ($_POST);
+		// every other endpoint accepts JSON.
+		if (sendAsForm) {
+			options.form = body;
+		} else {
+			options.body = body;
+		}
 	}
 
 	let response;

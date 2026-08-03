@@ -429,7 +429,7 @@ describe('Seven execute', () => {
 			});
 		});
 
-		it('create: posts payload, normalizes groups string into number array', async () => {
+		it('create: posts payload form-encoded, normalizes groups string into number array', async () => {
 			const { ctx, requestSpy } = buildExecuteContext({
 				resource: 'contact',
 				operation: 'create',
@@ -440,11 +440,13 @@ describe('Seven execute', () => {
 
 			await runExecute(ctx);
 
+			// POST /contacts only reads form-encoded bodies on the gateway
 			expect(requestSpy.mock.calls[0][1]).toMatchObject({
 				method: 'POST',
 				uri: 'https://gateway.seven.io/api/contacts',
-				body: { firstname: 'Alice', mobile_number: '+49170', groups: [1, 2, 3] },
+				form: { firstname: 'Alice', mobile_number: '+49170', groups: [1, 2, 3] },
 			});
+			expect(requestSpy.mock.calls[0][1].body).toBeUndefined();
 		});
 
 		it('update: PATCH /contacts/:id', async () => {
@@ -465,7 +467,7 @@ describe('Seven execute', () => {
 	});
 
 	describe('Group resource', () => {
-		it('create: POST /groups', async () => {
+		it('create: POST /groups form-encoded', async () => {
 			const { ctx, requestSpy } = buildExecuteContext({
 				resource: 'group',
 				operation: 'create',
@@ -474,11 +476,13 @@ describe('Seven execute', () => {
 
 			await runExecute(ctx);
 
+			// POST /groups only reads form-encoded bodies on the gateway
 			expect(requestSpy.mock.calls[0][1]).toMatchObject({
 				method: 'POST',
 				uri: 'https://gateway.seven.io/api/groups',
-				body: { name: 'VIPs' },
+				form: { name: 'VIPs' },
 			});
+			expect(requestSpy.mock.calls[0][1].body).toBeUndefined();
 		});
 
 		it('delete: DELETE /groups/:id with delete_contacts flag', async () => {
