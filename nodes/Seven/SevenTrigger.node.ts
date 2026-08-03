@@ -171,8 +171,27 @@ export class SevenTrigger implements INodeType {
 
 				if (events.length === 0) return false;
 
-				const eventTypes = events.length === ALL_EVENTS.length ? ['all'] : events;
-				const createdIds: number[] = [];
+				// Reconcile with hooks that already exist for this URL so partially
+				// covered selections neither create duplicates nor orphan existing hooks.
+				const response = (await sevenApiRequest.call(this, 'GET', '/hooks')) as IDataObject;
+				const hooks = (response?.hooks as IDataObject[]) ?? [];
+				const existing = hooks.filter(
+					(hook) =>
+						hook.target_url === webhookUrl &&
+						(hook.event_type === 'all' || events.includes(hook.event_type as string)),
+				);
+				const coveredEvents = new Set(existing.map((hook) => hook.event_type as string));
+
+				let eventTypes: string[];
+				if (coveredEvents.has('all')) {
+					eventTypes = [];
+				} else if (events.length === ALL_EVENTS.length && existing.length === 0) {
+					eventTypes = ['all'];
+				} else {
+					eventTypes = events.filter((event) => !coveredEvents.has(event));
+				}
+
+				const createdIds: number[] = existing.map((hook) => hook.id as number);
 
 				for (const eventType of eventTypes) {
 					const body: IDataObject = {

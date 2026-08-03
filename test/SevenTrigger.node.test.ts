@@ -102,7 +102,10 @@ describe('SevenTrigger lifecycle', () => {
 
 	describe('create', () => {
 		it('subscribes one hook per selected event with request_method=JSON', async () => {
-			apiRequestSpy.mockResolvedValueOnce({ id: 11 }).mockResolvedValueOnce({ id: 12 });
+			apiRequestSpy
+				.mockResolvedValueOnce({ hooks: [] })
+				.mockResolvedValueOnce({ id: 11 })
+				.mockResolvedValueOnce({ id: 12 });
 
 			const { ctx, staticData } = makeHookContext({ events: ['sms_mo', 'dlr'] });
 
@@ -111,9 +114,9 @@ describe('SevenTrigger lifecycle', () => {
 			);
 
 			expect(result).toBe(true);
-			expect(apiRequestSpy).toHaveBeenCalledTimes(2);
+			expect(apiRequestSpy).toHaveBeenCalledTimes(3);
 			expect(apiRequestSpy).toHaveBeenNthCalledWith(
-				1,
+				2,
 				'POST',
 				'/hooks',
 				expect.objectContaining({
@@ -125,8 +128,8 @@ describe('SevenTrigger lifecycle', () => {
 			expect(staticData.hookIds).toEqual([11, 12]);
 		});
 
-		it('uses event_type=all when all events are selected', async () => {
-			apiRequestSpy.mockResolvedValueOnce({ id: 99 });
+		it('uses event_type=all when all events are selected and none exist yet', async () => {
+			apiRequestSpy.mockResolvedValueOnce({ hooks: [] }).mockResolvedValueOnce({ id: 99 });
 
 			const allEvents = [
 				'sms_mo',
@@ -142,12 +145,39 @@ describe('SevenTrigger lifecycle', () => {
 
 			await trigger.webhookMethods.default.create.call(ctx as unknown as IHookFunctions);
 
-			expect(apiRequestSpy).toHaveBeenCalledTimes(1);
+			expect(apiRequestSpy).toHaveBeenCalledTimes(2);
 			expect(apiRequestSpy).toHaveBeenCalledWith(
 				'POST',
 				'/hooks',
 				expect.objectContaining({ event_type: 'all' }),
 			);
+		});
+
+		it('subscribes only uncovered events and keeps existing hook IDs', async () => {
+			apiRequestSpy
+				.mockResolvedValueOnce({
+					hooks: [
+						{ id: 1, target_url: 'https://n8n.example/webhook/abc', event_type: 'sms_mo' },
+						{ id: 5, target_url: 'https://other.example', event_type: 'dlr' },
+					],
+				})
+				.mockResolvedValueOnce({ id: 12 });
+
+			const { ctx, staticData } = makeHookContext({ events: ['sms_mo', 'dlr'] });
+
+			const result = await trigger.webhookMethods.default.create.call(
+				ctx as unknown as IHookFunctions,
+			);
+
+			expect(result).toBe(true);
+			expect(apiRequestSpy).toHaveBeenCalledTimes(2);
+			expect(apiRequestSpy).toHaveBeenNthCalledWith(
+				2,
+				'POST',
+				'/hooks',
+				expect.objectContaining({ event_type: 'dlr' }),
+			);
+			expect(staticData.hookIds).toEqual([1, 12]);
 		});
 
 		it('returns false when no events are selected', async () => {

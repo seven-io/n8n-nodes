@@ -49,8 +49,9 @@ export async function sevenApiRequest(
 		options.body = body;
 	}
 
+	let response;
 	try {
-		return await this.helpers.requestWithAuthentication.call(
+		response = await this.helpers.requestWithAuthentication.call(
 			this,
 			resolveCredentialType(this),
 			options,
@@ -58,6 +59,16 @@ export async function sevenApiRequest(
 	} catch (error) {
 		throw new NodeApiError(this.getNode(), error as JsonObject);
 	}
+
+	// Some endpoints report failures with HTTP 200 and { success: false, ... }.
+	// Responses without a success field pass through untouched.
+	if (response !== null && typeof response === 'object' && response.success === false) {
+		throw new NodeApiError(this.getNode(), response as JsonObject, {
+			message: 'The seven API reported a failure',
+		});
+	}
+
+	return response;
 }
 
 export async function sevenApiRequestAllItems(

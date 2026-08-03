@@ -170,7 +170,9 @@ export class Seven implements INodeType {
 						const format = this.getNodeParameter('format', i, 'json') as string;
 						const qs: IDataObject = { format };
 						if (country) qs.country = country;
-						responseData = await sevenApiRequest.call(this, 'GET', '/pricing', {}, qs);
+						const pricing = await sevenApiRequest.call(this, 'GET', '/pricing', {}, qs);
+						// CSV responses arrive as a plain string; wrap them for item output
+						responseData = typeof pricing === 'string' ? { csv: pricing } : pricing;
 					} else if (operation === 'getAnalytics') {
 						const filters = this.getNodeParameter('filters', i, {});
 						responseData = await sevenApiRequest.call(this, 'GET', '/analytics', {}, filters);
@@ -410,7 +412,8 @@ async function executeGroupOperation(
 			return await sevenApiRequestAllItems.call(this, 'GET', '/groups');
 		}
 		const limit = this.getNodeParameter('limit', i, 50);
-		return (await sevenApiRequest.call(this, 'GET', '/groups', {}, { limit })) as IDataObject;
+		const response = (await sevenApiRequest.call(this, 'GET', '/groups', {}, { limit })) as IDataObject;
+		return Array.isArray(response) ? response : ((response.data as IDataObject[]) ?? response);
 	}
 	if (operation === 'create') {
 		return (await sevenApiRequest.call(this, 'POST', '/groups', {

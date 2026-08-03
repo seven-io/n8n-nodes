@@ -42,6 +42,22 @@ describe('seven v2 -> sevenApiRequest', () => {
 		expect(call.body).toBeUndefined();
 	});
 
+	it('throws when the API reports success=false with HTTP 200', async () => {
+		const ctx = buildContext({ success: false, error: 'insufficient balance' });
+
+		await expect(
+			sevenApiRequest.call(ctx, 'POST', '/sms', { to: 'x', text: 'y' }),
+		).rejects.toMatchObject({
+			name: 'NodeApiError',
+		});
+	});
+
+	it('passes through responses without a success field', async () => {
+		const ctx = buildContext({ amount: 12.34 });
+
+		await expect(sevenApiRequest.call(ctx, 'GET', '/balance')).resolves.toEqual({ amount: 12.34 });
+	});
+
 	it('wraps API errors as NodeApiError', async () => {
 		const ctx = {
 			getNode: jest.fn().mockReturnValue({ name: 'seven', type: 'n8n-nodes-seven.seven' }),
