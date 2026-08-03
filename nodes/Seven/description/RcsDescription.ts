@@ -1,4 +1,4 @@
-import { INodeProperties } from 'n8n-workflow';
+import type { INodeProperties } from 'n8n-workflow';
 
 export const rcsOperations: INodeProperties[] = [
 	{
@@ -15,71 +15,69 @@ export const rcsOperations: INodeProperties[] = [
 			{
 				name: 'Send',
 				value: 'send',
-				description: 'Send a RCS message',
-				action: 'Send RCS',
+				description: 'Send an RCS message',
+				action: 'Send an RCS message',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				description: 'Revoke an undelivered RCS message',
+				action: 'Revoke an RCS message',
+			},
+			{
+				name: 'Send Event',
+				value: 'sendEvent',
+				description: 'Send a typing or read event',
+				action: 'Send an RCS event',
 			},
 		],
 		default: 'send',
 	},
 ];
 
-const rcsSendProperties: INodeProperties[] = [
-	{
-		displayName: 'Text',
-		name: 'text',
-		type: 'string',
-		default: '',
-		required: true,
-		displayOptions: {
-			show: {
-				operation: ['send'],
-				resource: ['rcs'],
-			},
-		},
-		description:
-			'Text of the RCS message. To send a simple RCS message (without images, suggested replies, etc.), only enter the plain text of the message here. Otherwise, use an RCS object.',
-	},
+export const rcsFields: INodeProperties[] = [
 	{
 		displayName: 'To',
 		name: 'to',
 		type: 'string',
 		default: '',
-		placeholder: '+491716992343',
 		required: true,
 		displayOptions: {
 			show: {
-				operation: ['send'],
 				resource: ['rcs'],
+				operation: ['send', 'sendEvent'],
 			},
 		},
-		description:
-			'The recipient number for your RCS message. This can also be a contact name or a group name.',
+		description: 'Recipient number, contact, or group name',
 	},
 	{
-		displayName: 'From',
-		name: 'from',
+		displayName: 'Text',
+		name: 'text',
 		type: 'string',
+		typeOptions: {
+			rows: 4,
+		},
 		default: '',
-		placeholder: 'AgentABC',
+		required: true,
 		displayOptions: {
 			show: {
-				operation: ['send'],
 				resource: ['rcs'],
+				operation: ['send'],
 			},
 		},
 		description:
-			'The unique ID of your agent. You can view this in the Settings of your account. If not specified, the first RCS-capable sender will be used.',
+			'Plain text content. For rich content, send a JSON object via Additional Fields > Content.',
 	},
 	{
-		displayName: 'Options',
-		name: 'options',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
 		type: 'collection',
-		placeholder: 'Add Option',
+		placeholder: 'Add Field',
 		default: {},
 		displayOptions: {
 			show: {
-				operation: ['send'],
 				resource: ['rcs'],
+				operation: ['send'],
 			},
 		},
 		options: [
@@ -88,62 +86,110 @@ const rcsSendProperties: INodeProperties[] = [
 				name: 'delay',
 				type: 'dateTime',
 				default: '',
-				description: 'Pick a date for time delayed dispatch',
+				description: 'Scheduled delivery time',
 			},
 			{
-				displayName: 'Fallback',
+				displayName: 'Fallback (JSON)',
 				name: 'fallback',
-				type: 'options',
-				options: [
-					{ name: 'None', value: '' },
-					{ name: 'SMS', value: 'sms' },
-					{ name: 'Webview', value: 'webview' },
-				],
+				type: 'string',
 				default: '',
+				placeholder: 'sms',
 				description:
-					"If it is not possible to send an RCS message because, for example, the recipient's device does not support RCS, the message can be automatically sent through an alternative channel. If no fallback is specified, it is disabled.",
+					'Fallback channel ("sms", "webview") or custom JSON object for delivery failures',
 			},
 			{
 				displayName: 'Foreign ID',
 				name: 'foreign_id',
 				type: 'string',
 				default: '',
-				typeOptions: {
-					maxValue: 64,
-				},
-				placeholder: 'MyCustomForeignID',
-				description: 'Custom foreign ID returned in DLR callbacks',
+			},
+			{
+				displayName: 'From (Agent ID)',
+				name: 'from',
+				type: 'string',
+				default: '',
+				description: 'Agent unique ID. Defaults to first RCS-capable sender.',
 			},
 			{
 				displayName: 'Label',
 				name: 'label',
 				type: 'string',
 				default: '',
-				typeOptions: {
-					maxValue: 100,
-				},
-				placeholder: 'MyCustomLabel',
-				description: 'Custom label used to group analytics',
 			},
 			{
 				displayName: 'Performance Tracking',
 				name: 'performance_tracking',
 				type: 'boolean',
 				default: false,
-				description: 'Whether to enable performance tracking for URLs found in the message text',
+			},
+			{
+				displayName: 'Rich Content (JSON)',
+				name: 'richContent',
+				type: 'json',
+				default: '',
+				description: 'RCS rich content object. If set, replaces the plain Text parameter.',
 			},
 			{
 				displayName: 'TTL',
 				name: 'ttl',
 				type: 'number',
 				default: 2880,
-				typeOptions: {
-					minValue: 1,
-				},
-				description: 'Custom time to live specifying the validity period of a message in minutes',
+				typeOptions: { minValue: 1 },
+				description: 'Validity period in minutes (default 2880)',
+			},
+		],
+	},
+	{
+		displayName: 'Message ID',
+		name: 'messageId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['rcs'],
+				operation: ['delete'],
+			},
+		},
+		description: 'ID of the RCS message to revoke',
+	},
+	{
+		displayName: 'Event',
+		name: 'event',
+		type: 'options',
+		options: [
+			{ name: 'Is Typing', value: 'IS_TYPING' },
+			{ name: 'Read', value: 'READ' },
+		],
+		default: 'IS_TYPING',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['rcs'],
+				operation: ['sendEvent'],
+			},
+		},
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['rcs'],
+				operation: ['sendEvent'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Message ID',
+				name: 'msg_id',
+				type: 'string',
+				default: '',
+				description: 'RCS message ID. Defaults to last received message.',
 			},
 		],
 	},
 ];
-
-export const rcsFields: INodeProperties[] = [...rcsSendProperties];

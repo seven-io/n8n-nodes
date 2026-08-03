@@ -1,4 +1,4 @@
-import { INodeProperties } from 'n8n-workflow';
+import type { INodeProperties } from 'n8n-workflow';
 
 export const voiceOperations: INodeProperties[] = [
 	{
@@ -13,97 +13,107 @@ export const voiceOperations: INodeProperties[] = [
 		},
 		options: [
 			{
-				action: 'Convert text to voice',
-				description: 'Converts text to voice and calls a given number',
 				name: 'Send',
 				value: 'send',
+				description: 'Make a text-to-speech call',
+				action: 'Make a text to speech call',
+			},
+			{
+				name: 'Hang Up',
+				value: 'hangup',
+				description: 'Terminate an active call',
+				action: 'Terminate an active call',
 			},
 		],
 		default: 'send',
 	},
 ];
 
-const voiceSendProperties: INodeProperties[] = [
-	{
-		displayName: 'Text',
-		name: 'text',
-		type: 'string',
-		default: '',
-		required: true,
-		displayOptions: {
-			show: {
-				operation: ['send'],
-				resource: ['voice'],
-			},
-		},
-		description: 'Text message to be read out. Optionally as simple text or as SSML.',
-	},
+export const voiceFields: INodeProperties[] = [
 	{
 		displayName: 'To',
 		name: 'to',
 		type: 'string',
 		default: '',
-		placeholder: '+49876543210, MyGroup',
+		required: true,
+		placeholder: '+49170123456789',
+		displayOptions: {
+			show: {
+				resource: ['voice'],
+				operation: ['send'],
+			},
+		},
+		description: 'Recipient phone number in E.164 format, contact, or group name',
+	},
+	{
+		displayName: 'Text',
+		name: 'text',
+		type: 'string',
+		typeOptions: {
+			rows: 4,
+		},
+		default: '',
 		required: true,
 		displayOptions: {
 			show: {
-				operation: ['send'],
 				resource: ['voice'],
+				operation: ['send'],
 			},
 		},
-		description:
-			'The number of your recipient(s) separated by comma. Can be regular numbers or contact/groups from seven.',
+		description: 'Message text. Optionally formatted as SSML.',
 	},
 	{
-		displayName: 'From',
-		name: 'from',
-		type: 'string',
-		default: '',
-		placeholder: '+491716992343',
-		displayOptions: {
-			show: {
-				operation: ['send'],
-				resource: ['voice'],
-			},
-		},
-		description:
-			'Caller ID of the call. Please only use verified sender IDs or one of your numbers booked with us here.',
-	},
-	{
-		displayName: 'Options',
-		name: 'options',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
 		type: 'collection',
-		placeholder: 'Add Option',
+		placeholder: 'Add Field',
 		default: {},
 		displayOptions: {
 			show: {
-				operation: ['send'],
 				resource: ['voice'],
+				operation: ['send'],
 			},
 		},
 		options: [
 			{
-				displayName: 'Ringtime',
-				name: 'ringtime',
-				type: 'number',
-				typeOptions: {
-					maxValue: 60,
-					minValue: 5,
-				},
-				default: null,
-				description:
-					"The duration of how long it should ring at the recipient's end before hanging up. Here, 5 to 60 seconds are possible.",
+				displayName: 'From',
+				name: 'from',
+				type: 'string',
+				default: '',
+				description: 'Verified caller ID or booked number',
 			},
 			{
 				displayName: 'Foreign ID',
 				name: 'foreign_id',
 				type: 'string',
 				default: '',
-				description:
-					'A unique ID that you can use for later assignment of the call. This ID is passed in the webhook events.',
+				description: 'Unique identifier for webhook tracking',
+			},
+			{
+				displayName: 'Ring Time',
+				name: 'ringtime',
+				type: 'number',
+				typeOptions: {
+					minValue: 5,
+					maxValue: 60,
+				},
+				default: 30,
+				description: 'Ring duration in seconds (5-60)',
 			},
 		],
 	},
+	{
+		displayName: 'Call ID',
+		name: 'callId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['voice'],
+				operation: ['hangup'],
+			},
+		},
+		description: 'Identifier of the call to terminate',
+	},
 ];
-
-export const voiceFields: INodeProperties[] = [...voiceSendProperties];
