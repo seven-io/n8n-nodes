@@ -1,6 +1,9 @@
 {
-  "name": "n8n-nodes-seven",
+  "name": "@seven.io/n8n-nodes-seven",
   "version": "0.2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "seven.io nodes for n8n",
   "keywords": [
     "n8n-community-node-package"
