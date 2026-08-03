@@ -79,11 +79,11 @@ See `nodes/Seven/description/` in the source for the full per-operation paramete
 ## Development
 
 ```bash
-npm install
-npm run dev          # tsc watch
-npm run build        # production build + icon copy
-npm run lint         # eslint
-npm test             # jest unit tests
+pnpm install
+pnpm dev             # tsc watch
+pnpm build           # production build + icon copy
+pnpm lint            # eslint
+pnpm test            # jest unit tests
 ```
 
 ## Support

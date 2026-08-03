@@ -1,0 +1,5 @@
+# pnpm settings (pnpm >=10 reads these from pnpm-workspace.yaml, not package.json)
+# Neither package needs its install-time build script for lint/test/build here.
+allowBuilds:
+  eslint-plugin-n8n-nodes-base: false
+  isolated-vm: false
