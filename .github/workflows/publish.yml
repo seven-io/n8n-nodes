@@ -1,0 +1,44 @@
+name: Publish to npm
+# n8n requires community nodes to be published from GitHub Actions with provenance.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing (OIDC) needs npm >= 11.5.1
+      - run: npm install -g npm@^11.5.1
+
+      - name: Check release tag matches package version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME#v}" != "$VERSION" ]; then
+            echo "Release tag $GITHUB_REF_NAME does not match package.json version $VERSION"
+            exit 1
+          fi
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm test
+
+      # npm instead of pnpm publish: OIDC trusted publishing and provenance are reliably supported there
+      - run: npm publish --provenance --access public
+        env:
+          # Only needed until trusted publishing is configured on npmjs.com
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -90,6 +90,10 @@ pnpm lint            # eslint
 pnpm test            # jest unit tests
 ```
 
+### Releasing
+
+Releases are published to npm by the `Publish to npm` GitHub Action with provenance, as n8n requires for community nodes. Bump `version` in `package.json`, merge to `master`, then create a GitHub release with the tag `v<version>`. The action authenticates via npm trusted publishing (OIDC); the `NPM_TOKEN` repository secret is only needed until trusted publishing is configured for the package on npmjs.com.
+
 ## Support
 
 Need help? Feel free to [contact us](https://www.seven.io/en/company/contact/) or [open an issue](https://github.com/seven-io/n8n-nodes/issues).
