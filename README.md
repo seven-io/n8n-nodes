@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-teal.svg" alt="MIT License" /></a>
-  <a href="https://www.npmjs.com/package/@seven.io/n8n-nodes-seven"><img src="https://img.shields.io/npm/v/%40seven.io%2Fn8n-nodes-seven" alt="npm" /></a>
+  <a href="https://www.npmjs.com/package/n8n-nodes-seven"><img src="https://img.shields.io/npm/v/n8n-nodes-seven" alt="npm" /></a>
   <img src="https://img.shields.io/badge/n8n-community%20node-ea4b71" alt="n8n community node" />
   <img src="https://img.shields.io/badge/Node.js-20.15%2B-brightgreen" alt="Node.js 20.15+" />
 </p>
@@ -33,16 +33,20 @@
 
 ### From the n8n community node manager
 
-In n8n, go to **Settings > Community Nodes**, install `@seven.io/n8n-nodes-seven`.
+In n8n, go to **Settings > Community Nodes**, install `n8n-nodes-seven`.
 
 ### Manual
 
 ```bash
 cd ~/.n8n/custom
-npm install @seven.io/n8n-nodes-seven
+npm install n8n-nodes-seven
 ```
 
 Restart n8n so the node appears in the palette.
+
+### Migrating from `@seven.io/n8n-nodes-seven`
+
+Version 0.2.0 was briefly published as `@seven.io/n8n-nodes-seven`. n8n cannot resolve node types from npm scopes containing a dot, so workflows fail with `Unrecognized node type: @seven.io/n8n-nodes-seven`. Uninstall that package, install `n8n-nodes-seven` and re-add the seven nodes to affected workflows.
 
 ## Configuration
 

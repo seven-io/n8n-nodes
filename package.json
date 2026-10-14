@@ -1,5 +1,5 @@
 {
-  "name": "@seven.io/n8n-nodes-seven",
+  "name": "n8n-nodes-seven",
   "version": "0.2.0",
   "publishConfig": {
     "access": "public"

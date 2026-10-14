@@ -1,5 +1,5 @@
 {
-	"node": "@seven.io/n8n-nodes-seven.sevenTrigger",
+	"node": "n8n-nodes-seven.sevenTrigger",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Communication"],
