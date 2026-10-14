@@ -39,6 +39,3 @@ jobs:
 
       # npm instead of pnpm publish: OIDC trusted publishing and provenance are reliably supported there
       - run: npm publish --provenance --access public
-        env:
-          # Only needed until trusted publishing is configured on npmjs.com
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

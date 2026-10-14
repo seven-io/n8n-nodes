@@ -92,7 +92,7 @@ pnpm test            # jest unit tests
 
 ### Releasing
 
-Releases are published to npm by the `Publish to npm` GitHub Action with provenance, as n8n requires for community nodes. Bump `version` in `package.json`, merge to `master`, then create a GitHub release with the tag `v<version>`. The action authenticates via npm trusted publishing (OIDC); the `NPM_TOKEN` repository secret is only needed until trusted publishing is configured for the package on npmjs.com.
+Releases are published to npm by the `Publish to npm` GitHub Action with provenance, as n8n requires for community nodes. Bump `version` in `package.json`, merge to `master`, then create a GitHub release with the tag `v<version>`. The action authenticates via npm trusted publishing (OIDC), no npm token is needed.
 
 ## Support
 
